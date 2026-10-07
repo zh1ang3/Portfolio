@@ -1,0 +1,773 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Zi Yang Zhang Portfolio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Jersey+10&family=Jersey+15&display=swap">
+<style>
+/* Layout: one black stage with a thin-ruled header; every view is a "window" (white title bar, ruled frame) like the Figma file */
+:root {
+  --bg: #000000;
+  --fg: #ffffff;
+  --muted: #959595;
+  --dim: rgba(255, 255, 255, .55);
+  --faint: rgba(255, 255, 255, .40);
+  --rule: rgba(255, 255, 255, .25);
+  --hair: rgba(255, 255, 255, .10);
+  --ink: #000000;
+  --paper: #ffffff;
+  --navy: #0a003a;
+  --pink: #f28a8a;
+  --font-display: "Jersey 15", "Jersey 10", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --font-label: "Jersey 10", "Jersey 15", ui-monospace, Menlo, monospace;
+  --font-body: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --gutter: clamp(16px, 3.3vw, 50px);
+  --ease-gentle: cubic-bezier(.22, 1.2, .36, 1);
+  color-scheme: dark;
+}
+[hidden] { display: none !important; }
+html { overflow-x: clip; }
+body {
+  background: var(--bg); color: var(--fg); font-family: var(--font-body);
+  font-size: 16px; line-height: 1.5; overflow-x: clip; min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+body.locked { overflow: hidden; }
+a { color: inherit; }
+img { max-width: 100%; display: block; }
+:focus-visible { outline: 2px solid var(--fg); outline-offset: 3px; }
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; padding: 0; }
+
+/* ---------- header ---------- */
+.site-header {
+  display: flex; align-items: center; justify-content: space-between; gap: 24px;
+  padding-inline: var(--gutter); height: 112px; border-bottom: 1px solid var(--fg);
+}
+.logo { display: block; width: 30px; height: 31px; transition: transform .25s var(--ease-gentle); }
+.logo:hover { transform: rotate(-8deg) scale(1.12); }
+.logo img { width: 30px; height: 31px; object-fit: contain; image-rendering: auto; }
+.nav { display: flex; gap: clamp(14px, 2.2vw, 32px); align-items: center; flex-wrap: wrap; justify-content: flex-end; }
+.nav a {
+  font-family: var(--font-display); font-size: 24px; line-height: 1; color: var(--muted);
+  text-decoration: none; display: inline-block; transition: color .15s, transform .2s var(--ease-gentle);
+}
+.nav a:hover, .nav a:focus-visible, .nav a[aria-current="page"] { color: var(--fg); transform: scale(1.16); }
+
+/* ---------- views ---------- */
+.view[hidden] { display: none !important; }
+.home { min-height: calc(100vh - 113px); display: grid; place-items: center; padding: 64px var(--gutter) 200px; }
+
+.window { width: min(1200px, 100%); border: 3px solid var(--fg); background: var(--bg); }
+.home > div { width: min(1200px, 100%); }
+.win-slot { width: 100%; }
+#win { width: 100%; }
+#win { display: flex; flex-direction: column; overflow: hidden; }
+#win.floating {
+  position: fixed; z-index: 45; margin: 0;
+  transition: left .7s var(--ease-gentle), top .7s var(--ease-gentle), width .7s var(--ease-gentle), height .7s var(--ease-gentle), border-radius .5s;
+}
+#win.expanded { border-radius: 20px 20px 0 0; }
+#win .window-bar { flex: none; gap: 16px; justify-content: space-between; transition: height .5s var(--ease-gentle); }
+#win.expanded .window-bar { height: 110px; padding-inline: clamp(16px, 2.8vw, 48px); }
+.roller { position: relative; flex: 1; min-width: 0; height: 1.15em; overflow: hidden; font-size: clamp(28px, 3vw, 40px); line-height: 1.15; transition: font-size .55s var(--ease-gentle); }
+#win.expanded .roller { font-size: clamp(30px, 4.2vw, 64px); }
+.roller span { position: absolute; inset: 0 auto auto 0; width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.win-actions { display: flex; align-items: center; gap: 18px; flex: none; opacity: 0; pointer-events: none; transition: opacity .3s; }
+#win.expanded .win-actions { opacity: 1; pointer-events: auto; transition-delay: .3s; }
+.layers { position: relative; flex: 1; min-height: 0; }
+.home-layer { min-height: clamp(280px, 30vw, 440px); display: grid; place-items: center; padding: 24px; container-type: inline-size; transition: opacity .25s; }
+#win.expanded .home-layer { opacity: 0; pointer-events: none; }
+.port-layer {
+  position: absolute; inset: 0; overflow: auto; overscroll-behavior: contain; padding: clamp(24px, 3.6vw, 50px);
+  opacity: 0; visibility: hidden; transition: opacity .2s, visibility 0s .2s;
+}
+#win.expanded .port-layer { opacity: 1; visibility: visible; transition: opacity .35s .35s, visibility 0s; }
+.scrim { position: fixed; inset: 0; z-index: 44; background: rgba(18, 18, 18, .72); opacity: 0; pointer-events: none; transition: opacity .45s; }
+.scrim.on { opacity: 1; pointer-events: auto; }
+.window-bar {
+  background: var(--paper); color: var(--ink); height: 85px; display: flex; align-items: center;
+  padding-inline: 18px; font-family: var(--font-display); font-size: clamp(28px, 3vw, 40px); line-height: 1;
+}
+.window-body { min-height: clamp(260px, 30vw, 440px); display: grid; place-items: center; padding: 24px; }
+#win .ticker {
+  font-family: var(--font-display); font-size: clamp(34px, 10.4cqi, 96px); line-height: 1.05; text-align: center;
+  min-height: 1.05em; margin: 0; max-width: 100%; overflow-wrap: anywhere;
+}
+.ticker .caret { display: inline-block; width: .08em; height: .8em; background: var(--fg); margin-left: .06em; vertical-align: -.04em; animation: caret 1s steps(1) infinite; }
+@keyframes caret { 50% { opacity: 0; } }
+.hint { margin-top: 18px; font-family: var(--font-display); font-size: 20px; color: var(--muted); text-align: center; }
+
+/* ---------- portfolio (inside the grown window) ---------- */
+.pill-dark {
+  font-family: var(--font-display); font-size: 22px; line-height: 1; background: var(--ink); color: var(--paper);
+  padding: 8px 20px 9px; border-radius: 49px; text-decoration: none; transition: transform .2s var(--ease-gentle);
+}
+.pill-dark:hover { transform: scale(1.06); }
+.exit { width: 25px; height: 25px; opacity: .5; transition: opacity .15s, transform .2s var(--ease-gentle); }
+.exit:hover, .exit:focus-visible { opacity: 1; transform: rotate(90deg); }
+.exit svg { width: 25px; height: 25px; display: block; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr)); gap: 50px; }
+.card { text-align: left; display: grid; gap: 17px; min-width: 0; }
+.card .thumb { aspect-ratio: 16 / 9; overflow: hidden; background: #111; }
+.card .thumb img { width: 100%; height: 100%; object-fit: cover; transition: transform .45s var(--ease-gentle); }
+.card:hover .thumb img, .card:focus-visible .thumb img { transform: scale(1.04); }
+.card span { font-family: var(--font-display); font-size: clamp(24px, 2.2vw, 32px); line-height: 1; color: rgba(255, 255, 255, .75); transition: color .15s; }
+.card:hover span { color: var(--fg); }
+.project { position: relative; }
+.project .media { aspect-ratio: 16 / 9; background: #111; overflow: hidden; }
+.project .media img, .project .media video { width: 100%; height: 100%; object-fit: cover; }
+.back-pill {
+  position: absolute; top: 22px; left: 22px; z-index: 2; font-family: var(--font-display); font-size: 24px; line-height: 1;
+  background: rgba(255, 255, 255, .55); color: rgba(0, 0, 0, .55); padding: 7px 30px 8px; border-radius: 32px;
+  transition: background .15s, color .15s;
+}
+.back-pill:hover, .back-pill:focus-visible { background: var(--paper); color: var(--ink); }
+.project p { margin: 22px 0 0; max-width: 68ch; color: var(--dim); font-size: 16px; }
+
+/* ---------- case study ---------- */
+.case { padding-bottom: 0; }
+.case-head { padding: 31px var(--gutter) 0; }
+.case-title { font-family: var(--font-display); font-size: clamp(40px, 4.3vw, 64px); line-height: 1.1; margin: 0 0 16px; text-wrap: balance; }
+.meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 16px 32px; max-width: 1180px; margin: 0; }
+.meta div { min-width: 0; }
+.meta dt { font-weight: 600; font-size: 14px; color: var(--dim); }
+.meta dd { margin: 4px 0 0; font-weight: 500; font-size: 16px; }
+.hero { position: relative; margin-top: 40px; aspect-ratio: 16 / 9; background: var(--navy); overflow: hidden; max-width: 100%; }
+.hero video { width: 100%; height: 100%; object-fit: cover; display: block; }
+.play-btn {
+  position: absolute; left: 50%; top: 50%; width: 64px; height: 64px; margin: -32px 0 0 -32px; border-radius: 50%;
+  background: rgba(0, 0, 0, .55); display: grid; place-items: center; transition: transform .2s var(--ease-gentle), background .15s;
+}
+.play-btn svg { width: 22px; height: 26px; margin-left: 4px; }
+.play-btn:hover, .play-btn:focus-visible { transform: scale(1.12); background: rgba(0, 0, 0, .75); }
+.case-body { padding: 0 var(--gutter); display: grid; gap: 0; }
+.section { padding-block: 60px; display: grid; gap: 30px; }
+.section h2 {
+  font-family: var(--font-label); font-weight: 400; font-size: clamp(36px, 3.2vw, 48px); line-height: 1; letter-spacing: .02em;
+  color: var(--faint); margin: 0; text-transform: uppercase;
+}
+.prose { font-size: clamp(18px, 1.6vw, 24px); line-height: 1.45; max-width: 48ch; margin: 0; }
+.prose + .prose { margin-top: 1em; }
+.wide-prose .prose { max-width: 60ch; }
+.two-col { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); gap: 50px; }
+.two-col > div { display: grid; gap: 30px; align-content: start; min-width: 0; }
+.divider { width: min(553px, 60%); height: 3px; background: var(--rule); margin: 0 auto; border: 0; }
+.collage { background: var(--paper); padding: clamp(14px, 3.9vw, 56px); }
+.collage img { width: 100%; height: auto; }
+.learned { display: grid; gap: 28px; max-width: 1146px; }
+.learned p { margin: 0; font-size: clamp(18px, 1.6vw, 24px); line-height: 1.45; color: rgba(255, 255, 255, .78); max-width: 60ch; }
+.learned strong { color: var(--fg); font-weight: 600; }
+.next { display: flex; justify-content: center; padding-block: 20px 70px; }
+.next a { font-family: var(--font-display); font-size: 28px; color: var(--muted); text-decoration: none; transition: color .15s; }
+.next a:hover { color: var(--fg); }
+
+/* ---------- footer ---------- */
+.footer { border-top: 3px solid var(--rule); padding: 42px var(--gutter) 120px; }
+.footer-inner { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 40px; border-bottom: 1px solid var(--hair); padding: 38px 0 80px; }
+.footer-brand { display: grid; gap: 18px; align-content: start; }
+.footer-brand .name { font-family: var(--font-display); font-size: 32px; line-height: 1; }
+.footer-cols { display: flex; flex-wrap: wrap; gap: 40px; }
+.footer-col h3 { font-family: var(--font-display); font-weight: 400; font-size: 22px; margin: 0 0 14px; }
+.footer-col ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.footer-col a { text-decoration: none; color: var(--dim); font-weight: 500; transition: color .15s; }
+.footer-col a:hover { color: var(--fg); }
+.copyright { margin-top: 24px; color: var(--dim); font-size: 14px; }
+
+/* ---------- placeholder pages ---------- */
+.stub { min-height: calc(100vh - 113px); display: grid; place-items: center; padding: 64px var(--gutter) 200px; }
+.stub .window-body { flex-direction: column; text-align: center; gap: 14px; }
+.stub p { margin: 0; color: var(--dim); font-size: 18px; max-width: 40ch; }
+.stub a.pill-light {
+  font-family: var(--font-display); font-size: 22px; background: var(--paper); color: var(--ink); text-decoration: none;
+  padding: 8px 22px 9px; border-radius: 40px; display: inline-block; margin-top: 8px;
+}
+
+/* ---------- the cat ---------- */
+.cat {
+  position: absolute; left: 0; top: 0; z-index: 60; cursor: grab; touch-action: none; user-select: none;
+  -webkit-user-select: none; will-change: transform; transition: opacity .5s;
+}
+.cat.quiet { opacity: .35; }
+.cat.away { opacity: 0; pointer-events: none; }
+.cat img { width: 100%; height: 100%; image-rendering: pixelated; image-rendering: crisp-edges; pointer-events: none; display: block; }
+.cat.held { cursor: grabbing; }
+.fx {
+  position: absolute; z-index: 61; pointer-events: none; font-family: var(--font-display); line-height: 1;
+  animation: float-up 1.6s ease-out forwards;
+}
+.fx.z { color: var(--fg); font-size: 22px; }
+.fx.heart { color: var(--pink); font-size: 30px; animation-duration: 1s; }
+@keyframes float-up { from { transform: translate(0, 0) scale(.7); opacity: 0; } 15% { opacity: 1; } to { transform: translate(14px, -46px) scale(1.1); opacity: 0; } }
+
+@media (max-width: 640px) {
+  .site-header { height: auto; min-height: 84px; padding-block: 16px; align-items: flex-start; }
+  .nav a { font-size: 20px; }
+  .window-bar { height: 64px; }
+  #win.expanded .window-bar { height: 84px; }
+  .back-pill { top: 12px; left: 12px; font-size: 20px; padding: 5px 20px 6px; }
+  .section { padding-block: 44px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fx { animation: none !important; }
+  #win.floating, .roller, .port-layer, .home-layer { transition: none !important; }
+  .ticker .caret { animation: none; }
+}
+</style>
+</head>
+<body>
+
+
+<header class="site-header">
+  <a class="logo" href="#home" aria-label="Zi Yang Zhang, home"><img src="assets/logo.png" alt=""></a>
+  <nav class="nav" aria-label="Main">
+    <a href="#about">About</a>
+    <a href="#portfolio">Portfolio</a>
+    <a href="#b-sides">B-Sides</a>
+    <a href="#resume">Resume</a>
+    <a href="#contact">Contact</a>
+  </nav>
+</header>
+
+<main>
+  <!-- HOME -->
+  <section class="view home" id="view-home" aria-label="Home">
+    <div>
+      <div class="win-slot" id="win-slot">
+        <div class="window" id="win" data-perch role="region" aria-labelledby="roller">
+          <div class="window-bar">
+            <h2 class="roller" id="roller"><span>Welcome to my Portfolio</span></h2>
+            <div class="win-actions">
+              <a class="pill-dark" id="case-link" href="#panty-stocking" hidden>View case study</a>
+              <button class="exit" id="exit" aria-label="Close portfolio">
+                <svg viewBox="0 0 25 25" aria-hidden="true" fill="#000"><path d="M0 0h5v5H0zM20 0h5v5h-5zM5 5h5v5H5zM15 5h5v5h-5zM10 10h5v5h-5zM5 15h5v5H5zM15 15h5v5h-5zM0 20h5v5H0zM20 20h5v5h-5z"/></svg>
+              </button>
+            </div>
+          </div>
+          <div class="layers">
+            <div class="home-layer">
+              <p class="ticker" aria-live="off"><span id="ticker-text">Hi, I’m Zi</span><span class="caret" aria-hidden="true"></span></p>
+            </div>
+            <div class="port-layer" id="port-layer">
+              <div class="grid" id="grid">
+                <button class="card" data-project="ps"><div class="thumb" data-perch><img src="assets/thumb-ps.jpg" alt=""></div><span>Panty &amp; Stocking Title Sequence</span></button>
+                <button class="card" data-project="gm"><div class="thumb" data-perch><img src="assets/thumb-gm.jpg" alt=""></div><span>GENTLE MONSTER Brand Identity</span></button>
+              </div>
+              <div class="project" id="project" hidden>
+                <button class="back-pill" id="back">Back</button>
+                <div class="media" id="media"></div>
+                <p id="project-blurb"></p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="hint">Psst. You can pick up the duckling.</p>
+    </div>
+  </section>
+
+  <!-- CASE STUDY -->
+  <article class="view case" id="view-case" hidden aria-labelledby="case-title">
+    <div class="case-head">
+      <h1 class="case-title" id="case-title">Panty&amp;Stocking Title Sequence</h1>
+      <dl class="meta">
+        <div><dt>Timeline</dt><dd>October 22 – December 16</dd></div>
+        <div><dt>Skills</dt><dd>Graphic Design, Animation, Storytelling</dd></div>
+        <div><dt>Tools</dt><dd>After Effects, Illustrator</dd></div>
+      </dl>
+    </div>
+    <div class="hero">
+      <video id="case-video" src="assets/video/panty-stocking.mp4" poster="assets/video/ps-poster.jpg" preload="metadata" playsinline aria-label="Panty &amp; Stocking title sequence"></video>
+      <button class="play-btn" id="case-play" aria-label="Play the title sequence">
+        <svg viewBox="0 0 22 26" aria-hidden="true"><path d="M0 0l22 13L0 26z" fill="#fff"/></svg>
+      </button>
+    </div>
+    <div class="case-body">
+      <section class="section wide-prose">
+        <h2>Overview</h2>
+        <p class="prose">For this project, I created a title sequence inspired by Panty &amp; Stocking with Garterbelt. My goal was to reinterpret the visual identity of the series through a fast-paced motion piece that captures its bold, chaotic, and playful personality. I focused on combining graphic design, typography, color, and animation to create something that feels energetic while still being visually organized.</p>
+      </section>
+      <hr class="divider">
+      <section class="section">
+        <div class="two-col">
+          <div>
+            <h2>The Problem</h2>
+            <p class="prose">The challenge was to create a title sequence that captured the bold and energetic style of Panty &amp; Stocking while working primarily with vector art. Since the original series has a very distinct anime style with exaggerated characters, bright colors, and detailed visuals, I needed to simplify these elements without losing the personality of the source material.</p>
+          </div>
+          <div>
+            <h2>The Solution</h2>
+            <p class="prose">I recreated key visual elements as vector art and used simplified shapes, bold outlines, and bright colors to build a consistent visual style throughout the sequence. I then animated these vector elements through movement, scaling, rotation, and transitions to create a fast-paced title sequence. Using vector art also allowed me to easily adjust the size, position, and the individual elements of each composition while still keeping everything clean and consistent.</p>
+          </div>
+        </div>
+      </section>
+      <hr class="divider">
+      <section class="section">
+        <h2>Visual Reference</h2>
+        <div class="collage" data-perch><img src="assets/ref-visual.jpg" alt="Stills from Panty &amp; Stocking with Garterbelt used as visual reference" loading="lazy"></div>
+      </section>
+      <hr class="divider">
+      <section class="section">
+        <h2>Moodboard</h2>
+        <div class="collage" data-perch><img src="assets/ref-mood.jpg" alt="Moodboard of bold, flat, high-contrast character illustrations" loading="lazy"></div>
+      </section>
+      <hr class="divider">
+      <section class="section">
+        <h2>Styleframe</h2>
+        <div class="collage" data-perch><img src="assets/ref-style.jpg" alt="Twelve styleframes from the title sequence" loading="lazy"></div>
+      </section>
+      <hr class="divider">
+      <section class="section">
+        <h2>What I’ve Learned</h2>
+        <div class="learned">
+          <p>The biggest thing I learned from this project was how much I could simplify and still have it feel like Panty &amp; Stocking. The show has so much detail, so I had to figure out which parts actually matter, like the colors, the outlines, and the overall shapes of things. Working in vector also made animating way easier, because I could move, scale, and re-time pieces in After Effects without having to redraw anything. It showed me that a lot of the energy in a title sequence comes from the timing and movement.</p>
+        </div>
+      </section>
+      <div class="next"><a href="#portfolio">← Back to portfolio</a></div>
+    </div>
+    <footer class="footer">
+      <div class="footer-inner">
+        <div class="footer-brand">
+          <img src="assets/logo.png" alt="" width="30" height="31">
+          <span class="name">Zi Yang Zhang</span>
+        </div>
+        <div class="footer-cols">
+          <div class="footer-col"><h3>Work</h3><ul><li><a href="#portfolio">Portfolio</a></li><li><a href="#panty-stocking">Panty &amp; Stocking</a></li><li><a href="#b-sides">B-Sides</a></li></ul></div>
+          <div class="footer-col"><h3>About</h3><ul><li><a href="#about">About me</a></li><li><a href="#resume">Resume</a></li></ul></div>
+          <div class="footer-col"><h3>Say hi</h3><ul><li><a href="#contact">Contact</a></li></ul></div>
+        </div>
+      </div>
+      <p class="copyright">© <span id="year">2026</span> Zi Yang Zhang</p>
+    </footer>
+  </article>
+
+  <!-- PLACEHOLDER PAGES -->
+  <section class="view stub" id="view-stub" hidden aria-labelledby="stub-title">
+    <div class="window" data-perch>
+      <div class="window-bar" id="stub-title">About</div>
+      <div class="window-body">
+        <div>
+          <p id="stub-copy">This page is still being built.</p>
+          <a class="pill-light" href="#portfolio">See my work</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div class="scrim" id="scrim"></div>
+
+<div class="cat" id="cat" role="img" aria-label="A little yellow pixel duckling. Drag it anywhere."><img id="cat-img" alt="" draggable="false"></div>
+
+<script>
+/* ===== Projects: drop your video files in assets/video/ and set the paths here ===== */
+const PROJECTS = {
+  ps: { title: 'Panty & Stocking Title Sequence', poster: 'assets/video/ps-poster.jpg', video: 'assets/video/panty-stocking.mp4', caseStudy: '#panty-stocking',
+        blurb: 'For this project, I created a title sequence inspired by Panty & Stocking with Garterbelt. I wanted to capture the show’s bold, chaotic, and playful personality in a fast-paced motion piece that still feels visually organized.' },
+  gm: { title: 'GENTLE MONSTER Brand Identity', poster: 'assets/thumb-gm.jpg', video: null, caseStudy: null,
+        blurb: 'Brand identity motion piece for GENTLE MONSTER.' },
+};
+
+/* ===== Router ===== */
+const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const views = { home: 'view-home', case: 'view-case', stub: 'view-stub' };
+const STUBS = {
+  about: ['About', 'This page is still being built. Check back soon.'],
+  'b-sides': ['B-Sides', 'Side projects and experiments are on their way.'],
+  resume: ['Resume', 'My resume will live here soon.'],
+  contact: ['Contact', 'Contact details are coming soon.'],
+};
+const win = document.getElementById('win'), slot = document.getElementById('win-slot'), scrim = document.getElementById('scrim');
+const roller = document.getElementById('roller');
+let expanded = false, closeTimer = 0;
+
+function showView(id) { for (const v of Object.values(views)) document.getElementById(v).hidden = v !== id; }
+function setNav(r) {
+  document.querySelectorAll('.nav a').forEach(a => a.removeAttribute('aria-current'));
+  const map = { portfolio: 'portfolio', 'panty-stocking': 'portfolio', about: 'about', 'b-sides': 'b-sides', resume: 'resume', contact: 'contact' };
+  const hit = document.querySelector(`.nav a[href="#${map[r] || ''}"]`);
+  if (hit) hit.setAttribute('aria-current', 'page');
+}
+
+/* Title bar text rolls: the old line slides out, the new one slides in behind it */
+function roll(text, dir = 'up', instant = false) {
+  const spans = roller.querySelectorAll('span');
+  const cur = spans[spans.length - 1];
+  if (cur && cur.textContent === text) return;
+  spans.forEach(sp => { if (sp !== cur) sp.remove(); });
+  const n = document.createElement('span'); n.textContent = text; roller.append(n);
+  if (!cur) return;
+  if (instant || reduceMotion) { cur.remove(); return; }
+  const d = dir === 'up' ? 1 : -1, opt = { duration: 460, easing: 'cubic-bezier(.65,0,.25,1)' };
+  cur.animate([{ transform: 'translateY(0)' }, { transform: `translateY(${-110 * d}%)` }], { ...opt, fill: 'forwards' }).onfinish = () => cur.remove();
+  n.animate([{ transform: `translateY(${110 * d}%)` }, { transform: 'translateY(0)' }], opt);
+}
+
+/* The welcome window grows into the portfolio window, and shrinks back */
+function targetRect() {
+  const g = Math.max(16, Math.min(50, innerWidth * .033));
+  const w = Math.min(1352, innerWidth - 2 * g), top = innerWidth < 640 ? 12 : 41;
+  return { left: (innerWidth - w) / 2, top, width: w, height: innerHeight - top };
+}
+function place(r) { Object.assign(win.style, { left: r.left + 'px', top: r.top + 'px', width: r.width + 'px', height: r.height + 'px' }); }
+function openPortfolio() {
+  if (expanded) return;
+  clearTimeout(closeTimer);
+  showView(views.home);
+  const r0 = win.getBoundingClientRect();
+  slot.style.height = r0.height + 'px';
+  win.style.transition = 'none';
+  win.classList.add('floating'); place(r0);
+  void win.offsetWidth; win.style.transition = '';
+  expanded = true;
+  requestAnimationFrame(() => { win.classList.add('expanded'); place(targetRect()); });
+  scrim.classList.add('on'); document.body.classList.add('locked');
+  roll('Portfolio', 'up');
+  setTimeout(() => document.getElementById('exit').focus({ preventScroll: true }), 400);
+}
+function closePortfolio(instant) {
+  if (!expanded) return;
+  expanded = false;
+  closeProject(true);
+  scrim.classList.remove('on');
+  win.classList.remove('expanded');
+  roll('Welcome to my Portfolio', 'down', instant);
+  const finish = () => { win.classList.remove('floating'); win.removeAttribute('style'); slot.removeAttribute('style'); document.body.classList.remove('locked'); };
+  if (instant || reduceMotion) return finish();
+  place(slot.getBoundingClientRect());
+  closeTimer = setTimeout(finish, 720);
+}
+addEventListener('resize', () => { if (expanded) { win.style.transition = 'none'; place(targetRect()); void win.offsetWidth; win.style.transition = ''; } });
+
+function route() {
+  const r = (location.hash || '#home').slice(1) || 'home';
+  setNav(r);
+  if (r === 'portfolio') {
+    if (document.getElementById(views.home).hidden) { showView(views.home); window.scrollTo(0, 0); requestAnimationFrame(openPortfolio); }
+    else openPortfolio();
+    return;
+  }
+  if (expanded) {
+    if (r === 'home') { closePortfolio(false); return; }
+    closePortfolio(true);
+  }
+  if (r === 'panty-stocking') { showView(views.case); window.scrollTo(0, 0); }
+  else if (STUBS[r]) {
+    document.getElementById('stub-title').textContent = STUBS[r][0];
+    document.getElementById('stub-copy').textContent = STUBS[r][1];
+    showView(views.stub); window.scrollTo(0, 0);
+  } else showView(views.home);
+}
+window.addEventListener('hashchange', route);
+document.getElementById('exit').addEventListener('click', () => { location.hash = 'home'; });
+scrim.addEventListener('click', () => { location.hash = 'home'; });
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape' || !expanded) return;
+  if (!document.getElementById('project').hidden) closeProject(); else location.hash = 'home';
+});
+
+/* ===== Portfolio cards → project (title rolls up into the project name) ===== */
+const grid = document.getElementById('grid'), project = document.getElementById('project'), media = document.getElementById('media');
+const caseLink = document.getElementById('case-link');
+grid.addEventListener('click', e => { const c = e.target.closest('.card'); if (c) openProject(c.dataset.project); });
+document.getElementById('back').addEventListener('click', () => closeProject());
+function openProject(key) {
+  const p = PROJECTS[key];
+  media.innerHTML = '';
+  if (p.video) {
+    const v = document.createElement('video');
+    Object.assign(v, { src: p.video, poster: p.poster, controls: true, playsInline: true, loop: true, preload: 'auto' });
+    v.addEventListener('error', () => { media.innerHTML = `<img src="${p.poster}" alt="">`; });
+    media.append(v);
+    v.play().catch(() => { v.muted = true; v.play().catch(() => {}); });
+  } else media.innerHTML = `<img src="${p.poster}" alt="${p.title}">`;
+  document.getElementById('project-blurb').textContent = p.blurb;
+  roll(p.title, 'up');
+  caseLink.hidden = !p.caseStudy; if (p.caseStudy) caseLink.href = p.caseStudy;
+  grid.hidden = true; project.hidden = false;
+  document.getElementById('port-layer').scrollTop = 0;
+  document.getElementById('back').focus({ preventScroll: true });
+}
+function stopVideo() { const v = media.querySelector('video'); if (v) v.pause(); }
+function closeProject(silent) {
+  const wasOpen = !project.hidden;
+  stopVideo(); project.hidden = true; grid.hidden = false; caseLink.hidden = true;
+  if (wasOpen && !silent) roll('Portfolio', 'down');
+}
+
+/* ===== Case study video: sits paused on the title card until you press play ===== */
+const caseVideo = document.getElementById('case-video'), casePlay = document.getElementById('case-play');
+casePlay.addEventListener('click', () => { caseVideo.controls = true; caseVideo.play().catch(() => { caseVideo.controls = false; }); });
+caseVideo.addEventListener('play', () => { casePlay.hidden = true; });
+caseVideo.addEventListener('pause', () => { casePlay.hidden = false; });
+caseVideo.addEventListener('ended', () => { casePlay.hidden = false; caseVideo.controls = false; caseVideo.currentTime = 0; caseVideo.load(); });
+function resetCaseVideo() { if (!caseVideo.paused) caseVideo.pause(); }
+window.addEventListener('hashchange', resetCaseVideo);
+
+/* ===== Typewriter ticker ===== */
+(function ticker() {
+  const el = document.getElementById('ticker-text');
+  const prefix = 'Hi, I’m ';
+  const words = ['Zi', 'a Motion Designer', 'a UI/UX Designer', 'a 3D Designer'];
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  let i = 0, n = words[0].length, dir = -1;
+  const step = () => {
+    const w = words[i];
+    el.textContent = prefix + w.slice(0, n);
+    if (dir < 0) {
+      if (n > 0) { n--; return setTimeout(step, 45); }
+      i = (i + 1) % words.length; dir = 1; return setTimeout(step, 220);
+    }
+    if (n < words[i].length) { n++; return setTimeout(step, 80); }
+    dir = -1; setTimeout(step, i === 0 ? 2200 : 1700);
+  };
+  setTimeout(step, 1800);
+})();
+document.getElementById('year').textContent = new Date().getFullYear();
+
+/* ===== The cat ===== */
+(function catEngine() {
+  const SPR = {
+    sit: [16, 19], blink: [16, 19], held: [16, 20], parachute: [24, 44], skate: [20, 21],
+    walk0: [16, 19], walk1: [16, 19], walk2: [16, 19], walk3: [16, 19], sleep0: [16, 19], sleep1: [16, 19],
+  };
+  // [x of the body centre, y of the feet] inside each sprite
+  const ANCHOR = { held: [8, 20], parachute: [12, 42], skate: [10, 21] };
+  const GRIP = [7.5, 0.5];  // you pick the duckling up by its little tuft
+  for (const k in SPR) { const im = new Image(); im.src = `assets/duckling/${k}.png`; }
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const el = document.getElementById('cat'), img = document.getElementById('cat-img');
+  // display scale (screen px per sprite pixel)
+  let S = innerWidth < 700 ? 4.5 : 6;
+  addEventListener('resize', () => { S = innerWidth < 700 ? 4.5 : 6; });
+
+  const st = {
+    mode: 'walk', x: -90, y: 0, dir: 1, surf: null, target: 0, timer: 0, anim: 0, vy: 0, vx: 0,
+    blinkAt: 2, blinking: 0, zAt: 0, sprite: '', grab: null, sat: 0,
+  };
+
+  const docW = () => document.documentElement.clientWidth;
+  const floorTop = () => scrollY + innerHeight - 4;
+  function rectOf(s) {
+    if (!s || !s.el) return { top: floorTop(), left: scrollX, right: scrollX + docW() };
+    const r = s.el.getBoundingClientRect();
+    return { top: r.top + scrollY, left: r.left + scrollX, right: r.right + scrollX };
+  }
+  function alive(s) {
+    if (!s || !s.el) return true;
+    if (!s.el.isConnected) return false;
+    const r = s.el.getBoundingClientRect();
+    return r.width > 60 && s.el.offsetParent !== null;
+  }
+  function surfaces() {
+    const list = [{ el: null }];
+    document.querySelectorAll('[data-perch]').forEach(e => {
+      if (e.offsetParent === null) return;
+      const r = e.getBoundingClientRect();
+      if (r.width > 90 && r.bottom > 0 && r.top < innerHeight) list.push({ el: e });
+    });
+    return list;
+  }
+  // highest surface at or below the feet, under x
+  function landingFor(x, feet) {
+    let best = { el: null }, bestTop = floorTop();
+    for (const s of surfaces()) {
+      if (!s.el) continue;
+      const r = rectOf(s);
+      if (x > r.left + 16 && x < r.right - 16 && r.top >= feet - 34 && r.top < bestTop) { best = s; bestTop = r.top; }
+    }
+    return best;
+  }
+  const rand = (a, b) => a + Math.random() * (b - a);
+
+  /* Quiet mode: while a video is on screen the duckling naps out of the way */
+  function activeVideoRects() {
+    const out = [];
+    const pv = document.querySelector('#media video');
+    if (pv && !document.getElementById('project').hidden) out.push(pv.getBoundingClientRect());
+    const cv = document.getElementById('case-video');
+    if (cv && !cv.paused && cv.offsetParent) out.push(cv.getBoundingClientRect());
+    return out.filter(r => r.width > 0 && r.bottom > 0 && r.top < innerHeight);
+  }
+  function overlapping(rects) {
+    const b = el.getBoundingClientRect();
+    return rects.find(r => b.right > r.left && b.left < r.right && b.bottom > r.top && b.top < r.bottom);
+  }
+
+  function sit(dur) { st.mode = 'sit'; st.timer = dur ?? rand(2.2, 5.5); }
+  function pickTarget() {
+    const r = rectOf(st.surf); const m = 60;
+    let lo = r.left + m, hi = r.right - m;
+    if (!st.surf || !st.surf.el) { lo = Math.max(lo, scrollX + m); hi = Math.min(hi, scrollX + innerWidth - m); }
+    if (hi - lo < 40) return null;
+    let t, tries = 0;
+    do { t = rand(lo, hi); } while (Math.abs(t - st.x) < 120 && ++tries < 8);
+    return t;
+  }
+  function decide() {
+    if (reduce) return sit(9999);
+    if (activeVideoRects().length) { st.mode = 'sleep'; st.timer = 9999; st.quietNap = true; return; }
+    const roll = Math.random();
+    if (st.sat > 12 && roll < .35) { st.mode = 'sleep'; st.timer = rand(9, 16); st.zAt = 0; st.sat = 0; return; }
+    const t = pickTarget();
+    if (t == null || roll < .18) return sit();
+    st.target = t; st.dir = t > st.x ? 1 : -1;
+    st.mode = (Math.abs(t - st.x) > 300 && Math.random() < .3) ? 'skate' : 'walk';
+  }
+  function spawnFx(cls, text, x, y) {
+    const f = document.createElement('span'); f.className = 'fx ' + cls; f.textContent = text;
+    f.style.left = x + 'px'; f.style.top = y + 'px'; document.body.append(f);
+    f.addEventListener('animationend', () => f.remove()); setTimeout(() => f.remove(), 2200);
+  }
+
+  /* ---- dragging: grab anywhere, drop anywhere ---- */
+  el.addEventListener('pointerdown', e => {
+    e.preventDefault(); el.setPointerCapture(e.pointerId);
+    st.grab = { id: e.pointerId, sx: e.pageX, sy: e.pageY, t: performance.now(), moved: false, lx: e.pageX, ly: e.pageY, lt: performance.now() };
+  });
+  el.addEventListener('pointermove', e => {
+    const g = st.grab; if (!g || e.pointerId !== g.id) return;
+    if (!g.moved && Math.hypot(e.pageX - g.sx, e.pageY - g.sy) > 5) { g.moved = true; st.mode = 'held'; el.classList.add('held'); }
+    if (!g.moved) return;
+    const now = performance.now(), dt = Math.max(1, now - g.lt);
+    st.vx = st.vx * .6 + ((e.pageX - g.lx) / dt * 1000) * .4;
+    g.lx = e.pageX; g.ly = e.pageY; g.lt = now;
+    st.x = e.pageX - st.dir * (GRIP[0] - ANCHOR.held[0]) * S; st.y = e.pageY + (ANCHOR.held[1] - GRIP[1]) * S; // head under the pointer
+  });
+  const release = e => {
+    const g = st.grab; if (!g || e.pointerId !== g.id) return;
+    st.grab = null; el.classList.remove('held');
+    if (!g.moved) { // a tap: pet the cat
+      spawnFx('heart', '♥', st.x + 8, st.y - spriteH('sit') - 10);
+      if (st.mode === 'sleep') sit(1.5);
+      st.blinking = .6; if (st.mode === 'walk') sit(2.5);
+      return;
+    }
+    const x = Math.min(Math.max(st.x, scrollX + 20), scrollX + docW() - 20); st.x = x;
+    st.surf = landingFor(x, st.y);
+    const drop = rectOf(st.surf).top - st.y;
+    st.vy = 0; st.vx = Math.max(-500, Math.min(500, st.vx));
+    st.mode = drop > 230 ? 'parachute' : 'fall';
+    if (drop <= 2) { st.y = rectOf(st.surf).top; sit(); }
+  };
+  el.addEventListener('pointerup', release);
+  el.addEventListener('pointercancel', release);
+
+  const spriteH = k => SPR[k][1] * S;
+  function setSprite(k) {
+    if (st.sprite !== k) { img.src = `assets/duckling/${k}.png`; st.sprite = k; }
+    const [w, h] = SPR[k];
+    el.style.width = w * S + 'px'; el.style.height = h * S + 'px';
+    return [w * S, h * S];
+  }
+
+  let last = performance.now();
+  st.surf = { el: null }; st.y = floorTop(); st.target = Math.min(docW() * .22, 260); st.mode = reduce ? 'sit' : 'walk'; if (reduce) { st.x = 80; sit(9999); }
+
+  function tick(now) {
+    const dt = Math.max(0, Math.min(.05, (now - last) / 1000)); last = now;
+    st.anim += dt;
+
+    if (st.mode !== 'held' && st.mode !== 'fall' && st.mode !== 'parachute') {
+      if (!alive(st.surf)) { st.surf = landingFor(st.x, st.y); st.mode = 'fall'; st.vy = 0; }
+      else {
+        const r = rectOf(st.surf);
+        st.y = r.top;
+        if (st.surf.el) st.x = Math.min(Math.max(st.x, r.left + 26), r.right - 26);
+      }
+    }
+
+    switch (st.mode) {
+      case 'walk':
+      case 'skate': {
+        const speed = (st.mode === 'skate' ? 210 : 52) * S / 6;
+        st.x += st.dir * speed * dt;
+        if ((st.dir > 0 && st.x >= st.target) || (st.dir < 0 && st.x <= st.target)) { st.x = st.target; sit(); }
+        break;
+      }
+      case 'sit':
+        st.timer -= dt; st.sat += dt;
+        if (st.timer <= 0) decide();
+        break;
+      case 'sleep':
+        st.timer -= dt; st.zAt -= dt;
+        if (st.zAt <= 0 && !st.quietNap) { st.zAt = 1.5; spawnFx('z', 'z', st.x + st.dir * 5 * S, st.y - 18 * S); }
+        if (st.timer <= 0) sit(rand(1.5, 3));
+        break;
+      case 'fall': {
+        st.vy += 2400 * dt; st.y += st.vy * dt; st.x += st.vx * dt; st.vx *= .9;
+        if (!alive(st.surf)) st.surf = landingFor(st.x, st.y);
+        const top = rectOf(st.surf).top;
+        if (st.y >= top) { st.y = top; st.vy = 0; st.vx = 0; sit(rand(1.2, 2.5)); }
+        break;
+      }
+      case 'parachute': {
+        st.y += 95 * dt; st.x += Math.sin(st.anim * 1.6) * 22 * dt + st.vx * dt; st.vx *= .95;
+        if (!alive(st.surf)) st.surf = landingFor(st.x, st.y);
+        const top = rectOf(st.surf).top;
+        if (st.y >= top) { st.y = top; st.vx = 0; sit(rand(1.5, 3)); }
+        break;
+      }
+    }
+
+    // blinking while sitting
+    if (st.mode === 'sit') { st.blinkAt -= dt; if (st.blinkAt <= 0) { st.blinking = .14; st.blinkAt = rand(2.2, 5); } }
+    st.blinking = Math.max(0, st.blinking - dt);
+
+    // a video is on: get out of its way, then nap quietly
+    const vids = (st.mode === 'held' || st.mode === 'fall' || st.mode === 'parachute') ? [] : activeVideoRects();
+    el.classList.toggle('quiet', vids.length > 0 && st.mode !== 'held');
+    if (vids.length) {
+      const hit = overlapping(vids);
+      let away = false;
+      if (hit) {
+        const leftX = hit.left + scrollX - 70, rightX = hit.right + scrollX + 70;
+        const canL = leftX >= scrollX + 70, canR = rightX <= scrollX + docW() - 70;
+        if (!canL && !canR) {
+          // the video fills the width: no clear spot, so step out of view until it stops
+          away = true;
+          if (st.mode !== 'sleep') { st.mode = 'sleep'; st.timer = 9999; st.quietNap = true; st.escaping = false; }
+        } else if (st.mode !== 'walk' || !st.escaping) {
+          const goLeft = canL && (!canR || Math.abs(st.x - leftX) < Math.abs(st.x - rightX));
+          st.target = goLeft ? leftX : rightX;
+          st.dir = st.target > st.x ? 1 : -1; st.mode = 'walk'; st.escaping = true;
+        }
+      }
+      else if (!(st.mode === 'walk' && st.escaping) && st.mode !== 'sleep') {
+        st.mode = 'sleep'; st.timer = 9999; st.quietNap = true; st.escaping = false;  // clear of the video: nap
+      }
+      el.classList.toggle('away', away);
+      if (st.mode === 'skate') st.mode = 'walk';
+    } else if (st.quietNap) { st.quietNap = false; st.escaping = false; el.classList.remove('away'); sit(rand(1, 2)); }
+    if (st.mode === 'sit' && st.escaping) st.escaping = false;
+
+    // never wander or drift off the visible page
+    if (st.mode !== 'held') st.x = Math.min(Math.max(st.x, scrollX + 70), scrollX + docW() - 70);
+    let k, flip = false, rot = 0, origin = '50% 100%';
+    switch (st.mode) {
+      case 'walk': k = 'walk' + (Math.floor(st.anim * 7) % 4); flip = st.dir < 0; break;
+      case 'skate': k = 'skate'; flip = st.dir < 0; break;
+      case 'sleep': k = 'sleep' + (Math.floor(st.anim / 1.2) % 2); flip = st.dir < 0; break;
+      case 'held': k = 'held'; flip = st.dir < 0; rot = Math.max(-18, Math.min(18, -st.vx * .02)); origin = `${(flip ? SPR.held[0] - GRIP[0] : GRIP[0]) * S}px ${GRIP[1] * S}px`; st.vx *= .85; break;
+      case 'parachute': k = 'parachute'; flip = st.dir < 0; rot = Math.sin(st.anim * 1.6) * 5; origin = '50% 0'; break;
+      case 'fall': k = 'sit'; break;
+      default: k = st.blinking > 0 ? 'blink' : 'sit'; flip = st.dir < 0;
+    }
+    const [w, h] = setSprite(k);
+    let [ax, ay] = ANCHOR[k] || [SPR[k][0] / 2, SPR[k][1]];
+    if (flip) ax = SPR[k][0] - ax;
+    const left = st.x - ax * S, top = st.y - ay * S;
+    el.style.transformOrigin = origin;
+    el.style.transform = `translate(${left}px, ${top}px)${rot ? ` rotate(${rot}deg)` : ''}`;
+    img.style.transform = flip ? 'scaleX(-1)' : '';
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+})();
+
+route();
+</script>
+
+</body>
+</html>
